@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MediSync</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg: #07090f;
+  --s1: #0e1117;
+  --s2: #151b26;
+  --s3: #1c2333;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --teal: #00e5b4;
+  --teal-dim: rgba(0,229,180,0.12);
+  --blue: #4d9fff;
+  --blue-dim: rgba(77,159,255,0.12);
+  --amber: #ffb547;
+  --amber-dim: rgba(255,181,71,0.12);
+  --rose: #ff5f72;
+  --rose-dim: rgba(255,95,114,0.12);
+  --violet: #a78bfa;
+  --violet-dim: rgba(167,139,250,0.12);
+  --text: #eef2ff;
+  --muted: #5c6b85;
+  --dim: #2a3348;
+  --font-head: 'Bricolage Grotesque', sans-serif;
+  --font-body: 'Instrument Sans', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.screen{display:none;min-height:100vh;}
+.screen.on{display:flex;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");opacity:0.025;pointer-events:none;z-index:9999;}
+
+/* ════ LANDING ════ */
+#landing{flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;}
+.orb1{width:500px;height:500px;background:radial-gradient(circle,rgba(0,229,180,0.07),transparent 70%);top:-150px;left:-100px;}
+.orb2{width:400px;height:400px;background:radial-gradient(circle,rgba(77,159,255,0.07),transparent 70%);bottom:-100px;right:-80px;}
+.land-logo{font-family:var(--font-head);font-size:4rem;font-weight:800;letter-spacing:-3px;background:linear-gradient(135deg,var(--teal) 0%,var(--blue) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.5rem;animation:riseUp .7s cubic-bezier(.34,1.56,.64,1) both;}
+.land-sub{color:var(--muted);font-size:1rem;font-weight:400;margin-bottom:4rem;animation:riseUp .7s .1s cubic-bezier(.34,1.56,.64,1) both;}
+.land-choices{display:flex;gap:1.5rem;z-index:1;animation:riseUp .6s .2s ease both;}
+.choice-card{width:240px;background:var(--s1);border:1px solid var(--border);border-radius:24px;padding:2.5rem 1.8rem;text-align:center;cursor:pointer;transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease;position:relative;overflow:hidden;}
+.choice-card::after{content:'';position:absolute;inset:0;border-radius:24px;opacity:0;transition:opacity .3s;}
+.choice-card.c-patient::after{background:radial-gradient(circle at 50% 0%,rgba(0,229,180,0.1),transparent 70%);}
+.choice-card.c-admin::after{background:radial-gradient(circle at 50% 0%,rgba(77,159,255,0.1),transparent 70%);}
+.choice-card:hover{transform:translateY(-8px);}
+.choice-card.c-patient:hover{border-color:var(--teal);box-shadow:0 20px 60px rgba(0,229,180,0.15);}
+.choice-card.c-admin:hover{border-color:var(--blue);box-shadow:0 20px 60px rgba(77,159,255,0.15);}
+.choice-card:hover::after{opacity:1;}
+.choice-icon{font-size:2.8rem;display:block;margin-bottom:1rem;}
+.choice-card h3{font-family:var(--font-head);font-size:1.25rem;font-weight:700;margin-bottom:.5rem;}
+.choice-card p{color:var(--muted);font-size:.82rem;line-height:1.6;}
+
+/* ════ OVERLAY MODAL ════ */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:500;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--s1);border:1px solid var(--border2);border-radius:24px;padding:2.2rem;width:400px;max-width:95vw;position:relative;animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both;}
+.modal.wide{width:520px;}
+.modal-x{position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;line-height:1;padding:.4rem;transition:color .2s;}
+.modal-x:hover{color:var(--text);}
+.modal h2{font-family:var(--font-head);font-size:1.6rem;font-weight:700;margin-bottom:.25rem;}
+.modal .m-sub{color:var(--muted);font-size:.83rem;margin-bottom:1.8rem;}
+.fg{margin-bottom:1.1rem;}
+.fg label{display:block;font-size:.73rem;font-weight:600;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:.35rem;}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:.7rem .9rem;color:var(--text);font-family:var(--font-body);font-size:.92rem;outline:none;transition:border-color .2s;resize:vertical;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--teal);}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--dim);}
+.fg select option{background:var(--s2);}
+.fg .fg-hint{color:var(--muted);font-size:.73rem;margin-top:.3rem;}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+.btn{padding:.75rem 1.2rem;border-radius:12px;border:none;cursor:pointer;font-family:var(--font-head);font-size:.95rem;font-weight:700;letter-spacing:.01em;transition:all .2s;width:100%;}
+.btn-teal{background:linear-gradient(135deg,var(--teal),#00b891);color:#041a14;}
+.btn-teal:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,229,180,0.25);}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#2b7de9);color:white;}
+.btn-blue:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(77,159,255,0.25);}
+.btn-ghost{background:var(--s3);color:var(--muted);border:1px solid var(--border);}
+.btn-ghost:hover{color:var(--text);border-color:var(--border2);}
+.btn-rose{background:var(--rose-dim);color:var(--rose);border:1px solid rgba(255,95,114,0.2);}
+.btn-rose:hover{background:rgba(255,95,114,0.2);}
+.btn-snooze{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(255,181,71,0.2);}
+.btn-snooze:hover{background:rgba(255,181,71,0.2);}
+.btn-sm{width:auto;padding:.4rem .9rem;font-size:.8rem;border-radius:8px;}
+.err{color:var(--rose);font-size:.78rem;margin-top:.5rem;display:none;}
+.err.on{display:block;}
+.hint{color:var(--muted);font-size:.72rem;text-align:center;margin-top:.9rem;}
+
+/* ════ PATIENT SCREEN ════ */
+#patient-screen{flex-direction:column;background:var(--bg);}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.8rem;background:var(--s1);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;}
+.topbar-logo{font-family:var(--font-head);font-weight:800;font-size:1.35rem;letter-spacing:-1px;background:linear-gradient(135deg,var(--teal),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.topbar-right{display:flex;align-items:center;gap:.9rem;}
+.uavatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:800;font-size:.8rem;background:linear-gradient(135deg,var(--teal),var(--blue));color:var(--bg);}
+.uname{font-size:.88rem;font-weight:500;}
+.logout-btn{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:.8rem;padding:.35rem .8rem;cursor:pointer;font-family:var(--font-body);transition:all .2s;}
+.logout-btn:hover{border-color:var(--rose);color:var(--rose);}
+.p-body{padding:1.8rem;max-width:900px;margin:0 auto;width:100%;}
+.p-greeting h1{font-family:var(--font-head);font-size:2rem;font-weight:800;letter-spacing:-1px;margin-bottom:.25rem;}
+.p-greeting p{color:var(--muted);font-size:.9rem;margin-bottom:2rem;}
+.hero-card{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:1.8rem;display:flex;align-items:center;gap:2rem;margin-bottom:1.5rem;position:relative;overflow:hidden;}
+.hero-card::before{content:'';position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,180,0.06),transparent 70%);}
+.ring-wrap{position:relative;width:96px;height:96px;flex-shrink:0;}
+.ring-wrap svg{transform:rotate(-90deg);}
+.ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-inner .rn{font-family:var(--font-head);font-size:1.4rem;font-weight:800;color:var(--teal);}
+.ring-inner .rl{font-size:.6rem;color:var(--muted);}
+.hero-info{flex:1;}
+.hero-info h2{font-family:var(--font-head);font-size:1.25rem;font-weight:700;margin-bottom:.3rem;}
+.hero-info p{color:var(--muted);font-size:.87rem;margin-bottom:.9rem;}
+.prog-track{background:var(--s3);border-radius:6px;height:7px;overflow:hidden;max-width:320px;}
+.prog-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--teal),var(--blue));transition:width 1s ease;}
+.section-title{font-family:var(--font-head);font-size:1rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+.meds-list{display:flex;flex-direction:column;gap:.75rem;margin-bottom:2rem;}
+
+/* ── Med card ── */
+.med-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:1.2rem 1.4rem;display:flex;align-items:flex-start;gap:1.2rem;transition:border-color .25s;}
+.med-card.done{border-color:rgba(0,229,180,0.25);}
+.med-card.alarm-active{border-color:var(--amber);box-shadow:0 0 0 2px rgba(255,181,71,0.15);animation:pulse-card 2s ease-in-out infinite;}
+.med-card.expired{border-color:var(--dim);opacity:.6;}
+.med-icon-box{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;margin-top:.1rem;}
+.med-details{flex:1;min-width:0;}
+.med-details h4{font-weight:600;font-size:.97rem;margin-bottom:.2rem;}
+.med-details .dosage{color:var(--muted);font-size:.8rem;}
+.med-times-row{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem;}
+.tchip{font-size:.74rem;padding:.2rem .55rem;border-radius:6px;background:var(--s3);color:var(--muted);display:flex;align-items:center;gap:.25rem;}
+.tchip.done{background:rgba(0,229,180,0.1);color:var(--teal);}
+.tchip.missed{background:rgba(255,95,114,0.1);color:var(--rose);}
+
+/* ── Duration badge ── */
+.dur-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;padding:.18rem .55rem;border-radius:6px;margin-top:.4rem;font-weight:600;}
+.dur-badge.active{background:rgba(77,159,255,0.12);color:var(--blue);border:1px solid rgba(77,159,255,0.2);}
+.dur-badge.completed{background:rgba(0,229,180,0.1);color:var(--teal);border:1px solid rgba(0,229,180,0.15);}
+.dur-badge.expired{background:var(--s3);color:var(--muted);border:1px solid var(--border);}
+.dur-badge.future{background:rgba(167,139,250,0.1);color:var(--violet);border:1px solid rgba(167,139,250,0.2);}
+.dur-badge.ongoing{background:rgba(255,181,71,0.1);color:var(--amber);border:1px solid rgba(255,181,71,0.2);}
+
+/* ── Countdown chip ── */
+.countdown-chip{display:inline-flex;align-items:center;gap:.35rem;font-size:.75rem;padding:.25rem .6rem;border-radius:8px;background:var(--amber-dim);color:var(--amber);border:1px solid rgba(255,181,71,0.2);font-weight:600;margin-top:.4rem;font-family:var(--font-head);}
+.countdown-chip.soon{background:rgba(255,95,114,0.15);color:var(--rose);border-color:rgba(255,95,114,0.25);animation:pulse-text 1s ease-in-out infinite;}
+.countdown-chip.now{background:rgba(255,95,114,0.2);color:var(--rose);border-color:var(--rose);}
+.take-btn{padding:.5rem 1.1rem;border-radius:10px;border:1px solid var(--teal);background:transparent;color:var(--teal);font-family:var(--font-head);font-size:.85rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;margin-top:.1rem;}
+.take-btn:hover{background:var(--teal-dim);}
+.take-btn:disabled{border-color:var(--dim);color:var(--muted);cursor:default;background:none;}
+.no-meds-msg{color:var(--muted);font-size:.9rem;text-align:center;padding:2rem;background:var(--s1);border-radius:16px;border:1px dashed var(--border);}
+
+/* ── Attendance graph ── */
+.graph-card{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:1.5rem;margin-bottom:2rem;}
+.graph-card h3{font-family:var(--font-head);font-size:1rem;font-weight:700;margin-bottom:1.2rem;}
+.att-grid{display:flex;flex-direction:column;gap:.7rem;}
+.att-row{display:flex;align-items:center;gap:.8rem;}
+.att-med-label{width:130px;font-size:.78rem;color:var(--muted);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;}
+.att-days{display:flex;gap:3px;flex:1;overflow-x:auto;padding-bottom:2px;}
+.att-cell{width:18px;height:18px;border-radius:4px;flex-shrink:0;transition:transform .15s;cursor:default;position:relative;}
+.att-cell:hover{transform:scale(1.25);z-index:10;}
+.att-cell.taken{background:var(--teal);}
+.att-cell.missed{background:var(--rose-dim);border:1px solid rgba(255,95,114,0.2);}
+.att-cell.pending{background:var(--s3);}
+.att-cell.future{background:rgba(167,139,250,0.08);border:1px dashed rgba(167,139,250,0.2);}
+.att-legend{display:flex;gap:1.2rem;margin-top:1rem;justify-content:flex-end;flex-wrap:wrap;}
+.att-legend-item{display:flex;align-items:center;gap:.4rem;font-size:.73rem;color:var(--muted);}
+.leg-dot{width:10px;height:10px;border-radius:3px;}
+
+/* ── Confirm dose ── */
+.confirm-body{text-align:center;padding:.5rem 0;}
+.confirm-body .ci{font-size:3.5rem;margin-bottom:.8rem;}
+.confirm-body h2{font-family:var(--font-head);font-size:1.45rem;font-weight:700;margin-bottom:.4rem;}
+.confirm-body p{color:var(--muted);font-size:.85rem;line-height:1.6;margin-bottom:1.5rem;}
+.btn-row{display:flex;gap:.7rem;}
+.btn-row .btn{flex:1;}
+
+.btn-rose-solid{background:linear-gradient(135deg,var(--rose),#e0243a);color:white;border:none;}
+.btn-rose-solid:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(255,95,114,0.3);}
+
+/* ════ MISSED DOSE MODAL ════ */
+#o-missed .modal{border-color:rgba(255,95,114,0.4);box-shadow:0 0 60px rgba(255,95,114,0.12);}
+.missed-body{text-align:center;padding:.3rem 0;}
+.missed-pulse{width:80px;height:80px;border-radius:50%;background:var(--rose-dim);border:2px solid var(--rose);display:flex;align-items:center;justify-content:center;font-size:2.4rem;margin:0 auto 1rem;animation:missed-shake 0.5s ease-in-out 3;}
+@keyframes missed-shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
+.missed-badge{display:inline-flex;align-items:center;gap:.3rem;background:var(--rose-dim);color:var(--rose);border:1px solid rgba(255,95,114,0.25);border-radius:20px;padding:.25rem .85rem;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.7rem;}
+.missed-body h2{font-family:var(--font-head);font-size:1.35rem;font-weight:800;margin-bottom:.35rem;color:var(--rose);}
+.missed-body p{color:var(--muted);font-size:.85rem;line-height:1.6;margin-bottom:1.2rem;}
+.missed-med-item{background:var(--s2);border:1px solid rgba(255,95,114,0.15);border-radius:12px;padding:.8rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.85rem;text-align:left;}
+.missed-med-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;}
+.missed-med-info{flex:1;}
+.missed-med-name{font-weight:700;font-size:.92rem;}
+.missed-med-time{color:var(--muted);font-size:.76rem;margin-top:.1rem;}
+.missed-med-time .late-tag{color:var(--rose);font-weight:600;}
+.missed-btn-row{display:flex;gap:.7rem;margin-top:1.2rem;}
+.missed-btn-row .btn{flex:1;}
+.missed-nav{display:flex;align-items:center;justify-content:center;gap:.5rem;margin-top:.9rem;}
+.missed-dot{width:7px;height:7px;border-radius:50%;background:var(--s3);transition:background .2s;}
+.missed-dot.on{background:var(--rose);}
+.missed-counter{color:var(--muted);font-size:.74rem;text-align:center;margin-top:.5rem;}
+
+
+#o-alarm .modal{border-color:rgba(255,181,71,0.4);box-shadow:0 0 60px rgba(255,181,71,0.15);}
+.alarm-body{text-align:center;padding:.5rem 0;}
+.alarm-pulse{width:90px;height:90px;border-radius:50%;background:var(--amber-dim);border:2px solid var(--amber);display:flex;align-items:center;justify-content:center;font-size:2.8rem;margin:0 auto 1.2rem;animation:alarm-ring 0.6s ease-in-out infinite alternate;position:relative;}
+.alarm-pulse::before,.alarm-pulse::after{content:'';position:absolute;inset:-8px;border-radius:50%;border:2px solid rgba(255,181,71,0.3);animation:ripple 1.5s ease-out infinite;}
+.alarm-pulse::after{animation-delay:.5s;inset:-16px;}
+.alarm-body h2{font-family:var(--font-head);font-size:1.5rem;font-weight:800;margin-bottom:.3rem;color:var(--amber);}
+.alarm-body .alarm-med{font-size:1.1rem;font-weight:600;margin-bottom:.2rem;}
+.alarm-body .alarm-dose{color:var(--muted);font-size:.85rem;margin-bottom:1.5rem;}
+.alarm-btn-row{display:flex;gap:.7rem;margin-top:.5rem;}
+.alarm-btn-row .btn{flex:1;}
+
+/* ════ NOTIFICATION FEED ════ */
+.notif-feed{position:fixed;top:1.2rem;right:1.2rem;display:flex;flex-direction:column;gap:.5rem;z-index:8000;max-width:320px;pointer-events:none;}
+.notif-card{background:var(--s2);border:1px solid var(--border2);border-radius:14px;padding:.85rem 1.1rem;display:flex;align-items:flex-start;gap:.7rem;animation:slideIn .4s cubic-bezier(.34,1.56,.64,1) both;pointer-events:all;position:relative;overflow:hidden;}
+.notif-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.notif-card.type-taken::before{background:var(--teal);}
+.notif-card.type-alert::before{background:var(--rose);}
+.notif-card.type-snooze::before{background:var(--amber);}
+.notif-icon{font-size:1.1rem;flex-shrink:0;margin-top:.05rem;}
+.notif-body{flex:1;}
+.notif-title{font-size:.83rem;font-weight:600;margin-bottom:.15rem;}
+.notif-desc{font-size:.75rem;color:var(--muted);line-height:1.4;}
+.notif-time{font-size:.68rem;color:var(--dim);white-space:nowrap;flex-shrink:0;}
+.notif-close{position:absolute;top:.5rem;right:.5rem;background:none;border:none;color:var(--muted);font-size:.85rem;cursor:pointer;padding:.2rem;line-height:1;}
+.notif-close:hover{color:var(--text);}
+.notif-bell-wrap{position:relative;cursor:pointer;}
+.notif-bell{font-size:1.1rem;transition:transform .2s;}
+.notif-bell-wrap:hover .notif-bell{transform:rotate(15deg);}
+.notif-dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:var(--rose);border:2px solid var(--s1);display:none;}
+.notif-dot.on{display:block;}
+.notif-panel{position:fixed;top:60px;right:1.2rem;width:320px;background:var(--s1);border:1px solid var(--border2);border-radius:18px;z-index:7000;animation:popIn .3s cubic-bezier(.34,1.56,.64,1) both;max-height:420px;overflow:hidden;display:none;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.notif-panel.open{display:block;}
+.notif-panel-hdr{padding:1rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.notif-panel-hdr h4{font-family:var(--font-head);font-weight:700;font-size:.95rem;}
+.notif-clear{background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;font-family:var(--font-body);}
+.notif-clear:hover{color:var(--teal);}
+.notif-panel-list{overflow-y:auto;max-height:350px;padding:.6rem;}
+.notif-panel-item{padding:.75rem;border-radius:10px;border-left:3px solid transparent;margin-bottom:.4rem;background:var(--s2);}
+.notif-panel-item.taken{border-left-color:var(--teal);}
+.notif-panel-item.alert{border-left-color:var(--rose);}
+.notif-panel-item.snooze{border-left-color:var(--amber);}
+.npi-title{font-size:.82rem;font-weight:600;margin-bottom:.2rem;}
+.npi-desc{font-size:.74rem;color:var(--muted);}
+.npi-time{font-size:.68rem;color:var(--dim);margin-top:.25rem;}
+.notif-empty{text-align:center;padding:2rem;color:var(--muted);font-size:.85rem;}
+
+/* ════ ADMIN SCREEN ════ */
+#admin-screen{flex-direction:row;background:var(--bg);}
+.sidebar{width:210px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:100vh;height:100vh;position:sticky;top:0;overflow-y:auto;}
+.sb-logo{font-family:var(--font-head);font-weight:800;font-size:1.2rem;letter-spacing:-1px;padding:1.4rem 1.4rem .2rem;background:linear-gradient(135deg,var(--teal),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.sb-role{color:var(--muted);font-size:.68rem;padding:0 1.4rem;margin-bottom:1.8rem;}
+.sb-nav{flex:1;display:flex;flex-direction:column;gap:.15rem;padding:0 .7rem;}
+.sbn{display:flex;align-items:center;gap:.65rem;padding:.65rem .7rem;border-radius:10px;cursor:pointer;color:var(--muted);font-size:.84rem;font-weight:500;transition:all .2s;}
+.sbn:hover{background:var(--s2);color:var(--text);}
+.sbn.on{background:var(--teal-dim);color:var(--teal);}
+.sbn .si{font-size:.95rem;width:18px;text-align:center;}
+.sb-badge{margin-left:auto;background:var(--rose);color:white;border-radius:10px;padding:.1rem .45rem;font-size:.68rem;}
+.sb-foot{padding:1.2rem 1.4rem;border-top:1px solid var(--border);}
+.sb-admin-info{display:flex;align-items:center;gap:.7rem;margin-bottom:.9rem;}
+.sb-avatar{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--blue),#2b7de9);display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:.78rem;font-weight:800;color:white;}
+.sb-aname{font-size:.83rem;font-weight:600;}
+.sb-arole{font-size:.68rem;color:var(--muted);}
+.admin-main{flex:1;overflow-y:auto;max-height:100vh;padding:2rem;}
+.aview{display:none;}
+.aview.on{display:block;}
+.a-hdr{margin-bottom:2rem;}
+.a-hdr h1{font-family:var(--font-head);font-size:1.9rem;font-weight:800;letter-spacing:-1px;margin-bottom:.25rem;}
+.a-hdr p{color:var(--muted);font-size:.88rem;}
+.a-hdr-row{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:2rem;}
+.a-hdr-row .a-hdr{margin:0;}
+.admin-topbar{display:flex;align-items:center;justify-content:flex-end;margin-bottom:1.5rem;gap:1rem;}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem;}
+.mc{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:1.3rem;position:relative;overflow:hidden;}
+.mc::after{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;}
+.mc.mt::after{background:radial-gradient(circle,rgba(0,229,180,0.2),transparent);}
+.mc.mb::after{background:radial-gradient(circle,rgba(255,95,114,0.2),transparent);}
+.mc.mg::after{background:radial-gradient(circle,rgba(255,181,71,0.2),transparent);}
+.mc-lbl{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.4rem;}
+.mc-val{font-family:var(--font-head);font-size:2.2rem;font-weight:800;}
+.mc-val.t{color:var(--teal);}
+.mc-val.r{color:var(--rose);}
+.mc-val.a{color:var(--amber);}
+.mc-note{font-size:.75rem;color:var(--muted);margin-top:.2rem;}
+.tcard{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:1.5rem;}
+.tcard-hdr{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);}
+.tcard-hdr h3{font-family:var(--font-head);font-size:.97rem;font-weight:700;}
+.srch{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.45rem .85rem;color:var(--text);font-family:var(--font-body);font-size:.82rem;outline:none;width:190px;transition:border-color .2s;}
+.srch:focus{border-color:var(--teal);}
+.srch::placeholder{color:var(--dim);}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:.8rem 1.4rem;text-align:left;font-size:.7rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;background:rgba(255,255,255,0.015);}
+tbody tr{border-top:1px solid var(--border);transition:background .15s;}
+tbody tr:hover{background:var(--s2);}
+tbody td{padding:.9rem 1.4rem;font-size:.86rem;vertical-align:middle;}
+.pcell{display:flex;align-items:center;gap:.7rem;}
+.pmini{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:800;font-size:.72rem;flex-shrink:0;}
+.comp-bar{width:90px;height:5px;background:var(--s3);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:.4rem;}
+.comp-fill{height:100%;border-radius:3px;}
+.badge{display:inline-flex;align-items:center;padding:.18rem .55rem;border-radius:6px;font-size:.72rem;font-weight:700;}
+.badge.ok{background:var(--teal-dim);color:var(--teal);}
+.badge.warn{background:var(--amber-dim);color:var(--amber);}
+.badge.crit{background:var(--rose-dim);color:var(--rose);}
+.abtn{padding:.35rem .75rem;border-radius:7px;border:1px solid var(--border);background:none;color:var(--muted);font-size:.77rem;cursor:pointer;font-family:var(--font-body);transition:all .2s;margin-right:.3rem;}
+.abtn:hover{border-color:var(--teal);color:var(--teal);}
+.abtn.del:hover{border-color:var(--rose);color:var(--rose);}
+.med-admin-row{display:flex;align-items:flex-start;gap:.7rem;padding:.75rem;background:var(--s2);border-radius:12px;margin-bottom:.5rem;}
+.mar-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;margin-top:.1rem;}
+.mar-info{flex:1;}
+.mar-name{font-size:.9rem;font-weight:600;}
+.mar-dose{color:var(--muted);font-size:.76rem;}
+.mar-times{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.3rem;}
+.mar-time{background:var(--s3);border-radius:5px;padding:.15rem .4rem;font-size:.7rem;color:var(--muted);}
+/* duration info in admin med row */
+.mar-duration{display:inline-flex;align-items:center;gap:.3rem;background:rgba(77,159,255,0.1);color:var(--blue);border:1px solid rgba(77,159,255,0.15);border-radius:5px;padding:.15rem .5rem;font-size:.7rem;font-weight:600;margin-top:.35rem;}
+.mar-duration.ongoing{background:rgba(255,181,71,0.1);color:var(--amber);border-color:rgba(255,181,71,0.15);}
+.mar-duration.done{background:rgba(0,229,180,0.08);color:var(--teal);border-color:rgba(0,229,180,0.12);}
+.alert-list{display:flex;flex-direction:column;gap:.7rem;}
+.alert-item{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1rem 1.2rem;display:flex;align-items:flex-start;gap:.9rem;}
+.alert-item.crit{border-left:3px solid var(--rose);}
+.alert-item.warn{border-left:3px solid var(--amber);}
+.alert-item.info{border-left:3px solid var(--blue);}
+.ai-icon{font-size:1.2rem;flex-shrink:0;margin-top:.1rem;}
+.ai-body{flex:1;}
+.ai-title{font-weight:600;font-size:.88rem;margin-bottom:.2rem;}
+.ai-desc{color:var(--muted);font-size:.8rem;line-height:1.5;}
+.ai-time{color:var(--dim);font-size:.75rem;white-space:nowrap;flex-shrink:0;}
+.empty-state{text-align:center;padding:3rem;color:var(--muted);font-size:.9rem;}
+.pd-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:1.2rem;}
+.pd-info-box{background:var(--s2);border-radius:12px;padding:.9rem 1rem;}
+.pd-info-box .pdk{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem;}
+.pd-info-box .pdv{font-size:.92rem;font-weight:600;}
+.mini-att{display:flex;gap:3px;flex-wrap:wrap;margin-top:.4rem;}
+.mini-cell{width:12px;height:12px;border-radius:3px;}
+.mini-cell.taken{background:var(--teal);}
+.mini-cell.missed{background:var(--rose-dim);border:1px solid rgba(255,95,114,0.15);}
+.mini-cell.pending{background:var(--s3);}
+.mini-cell.future{background:rgba(167,139,250,0.1);border:1px dashed rgba(167,139,250,0.2);}
+.act-log{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:1.5rem;}
+.act-log-hdr{padding:1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.act-log-hdr h3{font-family:var(--font-head);font-size:.97rem;font-weight:700;}
+.act-log-list{max-height:280px;overflow-y:auto;}
+.act-item{padding:.8rem 1.4rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:.9rem;font-size:.83rem;animation:fadeIn .3s ease;}
+.act-item:first-child{border-top:none;}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.act-dot.taken{background:var(--teal);}
+.act-dot.alert{background:var(--rose);}
+.act-dot.snooze{background:var(--amber);}
+.act-txt{flex:1;}
+.act-time{color:var(--dim);font-size:.73rem;white-space:nowrap;}
+.act-empty{padding:2rem;text-align:center;color:var(--muted);font-size:.83rem;}
+.toast{position:fixed;bottom:1.8rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--s2);border:1px solid var(--border2);border-radius:12px;padding:.7rem 1.4rem;font-size:.87rem;font-weight:500;z-index:9990;transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;display:flex;align-items:center;gap:.5rem;}
+.toast.up{transform:translateX(-50%) translateY(0);}
+.toast.ok{border-color:rgba(0,229,180,.3);color:var(--teal);}
+.toast.er{border-color:rgba(255,95,114,.3);color:var(--rose);}
+.toast.warn{border-color:rgba(255,181,71,.3);color:var(--amber);}
+@keyframes riseUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+@keyframes popIn{from{opacity:0;transform:scale(.88);}to{opacity:1;transform:scale(1);}}
+@keyframes slideIn{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes pulse-card{0%,100%{box-shadow:0 0 0 2px rgba(255,181,71,0.15);}50%{box-shadow:0 0 0 4px rgba(255,181,71,0.25),0 0 20px rgba(255,181,71,0.1);}}
+@keyframes pulse-text{0%,100%{opacity:1;}50%{opacity:.6;}}
+@keyframes alarm-ring{from{transform:rotate(-8deg) scale(1);}to{transform:rotate(8deg) scale(1.05);}}
+@keyframes ripple{0%{transform:scale(1);opacity:.6;}100%{transform:scale(1.4);opacity:0;}}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:4px;}
+@media(max-width:720px){
+  .land-choices{flex-direction:column;}
+  .metrics{grid-template-columns:1fr 1fr;}
+  #admin-screen{flex-direction:column;}
+  .sidebar{width:100%;height:auto;min-height:auto;position:relative;}
+  .sb-nav{flex-direction:row;flex-wrap:wrap;}
+  .two{grid-template-columns:1fr;}
+  .three{grid-template-columns:1fr 1fr;}
+  .notif-feed{right:.5rem;max-width:calc(100vw - 1rem);}
+}
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div id="landing" class="screen on">
+  <div class="orb orb1"></div><div class="orb orb2"></div>
+  <div class="land-logo">MediSync</div>
+  <p class="land-sub">Smart medication management — never double-dose, never miss a dose.</p>
+  <div class="land-choices">
+    <div class="choice-card c-patient" onclick="openO('o-patient')">
+      <span class="choice-icon">🏥</span>
+      <h3>I'm a Patient</h3>
+      <p>Mark doses, track your schedule, and see your medication attendance.</p>
+    </div>
+    <div class="choice-card c-admin" onclick="openO('o-admin')">
+      <span class="choice-icon">⚕️</span>
+      <h3>Doctor / Admin</h3>
+      <p>Manage patients, assign medications, and monitor compliance.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PATIENT AUTH -->
+<div class="overlay" id="o-patient">
+  <div class="modal">
+    <button class="modal-x" onclick="closeO('o-patient')">✕</button>
+    <h2>Patient Login</h2>
+    <p class="m-sub">Enter your credentials to access your dashboard</p>
+    <div class="fg"><label>Patient ID</label><input id="pi-id" placeholder="e.g. P-0042" /></div>
+    <div class="fg"><label>Date of Birth</label><input type="date" id="pi-dob" /></div>
+    <div class="err" id="pi-err">Patient ID not found. Ask your doctor to register you.</div>
+    <button class="btn btn-teal" onclick="doPatientLogin()">Continue →</button>
+  </div>
+</div>
+
+<!-- ADMIN AUTH -->
+<div class="overlay" id="o-admin">
+  <div class="modal">
+    <button class="modal-x" onclick="closeO('o-admin')">✕</button>
+    <h2>Admin Login</h2>
+    <p class="m-sub">Restricted to authorised medical staff only</p>
+    <div class="fg"><label>Username</label><input id="ai-u" placeholder="admin" /></div>
+    <div class="fg"><label>Password</label><input type="password" id="ai-p" placeholder="••••••••" /></div>
+    <div class="err" id="ai-err">Invalid credentials. Use admin / admin123</div>
+    <button class="btn btn-blue" onclick="doAdminLogin()">Sign In →</button>
+    <p class="hint">Demo credentials: <strong>admin</strong> / <strong>admin123</strong></p>
+  </div>
+</div>
+
+<!-- CONFIRM DOSE -->
+<div class="overlay" id="o-confirm">
+  <div class="modal">
+    <div class="confirm-body">
+      <div class="ci" id="conf-icon">💊</div>
+      <h2 id="conf-title">Confirm Dose</h2>
+      <p id="conf-desc">Please confirm you are taking this medication right now. This will be recorded.</p>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="closeO('o-confirm')">Cancel</button>
+        <button class="btn btn-teal" onclick="confirmDose()">✓ I Took It</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ALARM MODAL -->
+<div class="overlay" id="o-alarm">
+  <div class="modal">
+    <div class="alarm-body">
+      <div class="alarm-pulse" id="alarm-icon">💊</div>
+      <h2>⏰ Time for your Medicine!</h2>
+      <div class="alarm-med" id="alarm-med-name">Medication</div>
+      <div class="alarm-dose" id="alarm-med-dose">Please take your scheduled dose now.</div>
+      <div class="alarm-btn-row">
+        <button class="btn btn-snooze" onclick="snoozeAlarm()">⏱ Snooze 5 min</button>
+        <button class="btn btn-teal" onclick="alarmTakeNow()">✓ Take Now</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ████ MISSED DOSE MODAL ████ -->
+<div class="overlay" id="o-missed">
+  <div class="modal" id="missed-modal">
+    <div class="missed-body">
+      <div class="missed-pulse" id="missed-icon">💊</div>
+      <div class="missed-badge">⚠️ Missed Dose</div>
+      <h2 id="missed-title">You missed a dose!</h2>
+      <p id="missed-desc">You missed a scheduled dose. Would you like to take it now?</p>
+      <div id="missed-list"></div>
+      <div class="missed-btn-row">
+        <button class="btn btn-ghost" onclick="dismissMissed()">Already Taken</button>
+        <button class="btn btn-rose-solid" onclick="takeMissedNow()">Take Now</button>
+      </div>
+      <div class="missed-nav" id="missed-nav"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PATIENT -->
+<div class="overlay" id="o-add-patient">
+  <div class="modal wide">
+    <button class="modal-x" onclick="closeO('o-add-patient')">✕</button>
+    <h2>Add New Patient</h2>
+    <p class="m-sub">Register a patient and set their login credentials</p>
+    <div class="two">
+      <div class="fg"><label>First Name</label><input id="np-fn" placeholder="Priya" /></div>
+      <div class="fg"><label>Last Name</label><input id="np-ln" placeholder="Mehta" /></div>
+    </div>
+    <div class="two">
+      <div class="fg"><label>Date of Birth</label><input type="date" id="np-dob" /></div>
+      <div class="fg"><label>Condition / Diagnosis</label><input id="np-cond" placeholder="Type 2 Diabetes" /></div>
+    </div>
+    <div class="fg"><label>Patient ID (used for login)</label><input id="np-pid" placeholder="P-0043" /></div>
+    <div class="err" id="np-err">Please fill all required fields.</div>
+    <button class="btn btn-teal" onclick="saveNewPatient()">Register Patient →</button>
+  </div>
+</div>
+
+<!-- ADD MEDICATION -->
+<div class="overlay" id="o-add-med">
+  <div class="modal wide">
+    <button class="modal-x" onclick="closeO('o-add-med')">✕</button>
+    <h2>Assign Medication</h2>
+    <p class="m-sub">Prescribe a medication with schedule and duration</p>
+    <div class="fg"><label>Patient</label><select id="am-patient"></select></div>
+    <div class="two">
+      <div class="fg"><label>Medication Name</label><input id="am-name" placeholder="Paracetamol" /></div>
+      <div class="fg"><label>Dose / Strength</label><input id="am-dose" placeholder="500mg" /></div>
+    </div>
+    <div class="two">
+      <div class="fg">
+        <label>Icon</label>
+        <select id="am-icon">
+          <option value="💊">💊 Pill</option><option value="🔴">🔴 Capsule</option>
+          <option value="☀️">☀️ Vitamin</option><option value="🟢">🟢 Capsule</option>
+          <option value="💉">💉 Injection</option><option value="🧴">🧴 Liquid</option>
+          <option value="🫀">🫀 Heart</option><option value="🧠">🧠 Neuro</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Color</label>
+        <select id="am-color">
+          <option value="teal">Teal</option><option value="blue">Blue</option>
+          <option value="amber">Amber</option><option value="rose">Rose</option><option value="violet">Violet</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label>Dose Times (comma separated, 24h)</label><input id="am-times" placeholder="08:00, 14:00, 20:00" /></div>
+    <!-- ── DURATION FIELD ── -->
+    <div class="two">
+      <div class="fg">
+        <label>Duration</label>
+        <select id="am-duration-type" onchange="toggleDurationInput()">
+          <option value="days">Fixed number of days</option>
+          <option value="ongoing">Ongoing (no end date)</option>
+        </select>
+      </div>
+      <div class="fg" id="am-duration-wrap">
+        <label>Number of Days</label>
+        <input id="am-duration" type="number" min="1" max="365" placeholder="e.g. 3" />
+        <div class="fg-hint">e.g. 3 days for fever, 7 for antibiotics, 30 for chronic</div>
+      </div>
+    </div>
+    <!-- start date -->
+    <div class="fg">
+      <label>Start Date</label>
+      <input type="date" id="am-startdate" />
+      <div class="fg-hint">Leave blank to start today</div>
+    </div>
+    <div class="err" id="am-err">Please fill all fields and select a patient.</div>
+    <button class="btn btn-blue" onclick="saveNewMed()">Assign Medication →</button>
+  </div>
+</div>
+
+<!-- PATIENT DETAIL -->
+<div class="overlay" id="o-patient-detail">
+  <div class="modal wide">
+    <button class="modal-x" onclick="closeO('o-patient-detail')">✕</button>
+    <div id="pd-content"></div>
+  </div>
+</div>
+
+<!-- PATIENT SCREEN -->
+<div id="patient-screen" class="screen">
+  <nav class="topbar">
+    <div class="topbar-logo">MediSync</div>
+    <div class="topbar-right">
+      <div class="uavatar" id="p-av"></div>
+      <span class="uname" id="p-nm"></span>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </nav>
+  <div class="p-body">
+    <div class="p-greeting">
+      <h1 id="p-greet"></h1>
+      <p id="p-date"></p>
+    </div>
+    <div class="hero-card" id="p-hero">
+      <div class="ring-wrap">
+        <svg width="96" height="96" viewBox="0 0 96 96">
+          <circle cx="48" cy="48" r="40" fill="none" stroke="var(--s3)" stroke-width="8"/>
+          <circle cx="48" cy="48" r="40" fill="none" stroke="var(--teal)" stroke-width="8" stroke-linecap="round" id="p-ring-arc" stroke-dasharray="0 251"/>
+        </svg>
+        <div class="ring-inner">
+          <span class="rn" id="p-ring-num">0/0</span>
+          <span class="rl">DOSES</span>
+        </div>
+      </div>
+      <div class="hero-info">
+        <h2 id="p-hero-h"></h2>
+        <p id="p-hero-p"></p>
+        <div class="prog-track"><div class="prog-fill" id="p-prog" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="section-title">💊 Today's Medications</div>
+    <div class="meds-list" id="p-meds-list"></div>
+    <div class="graph-card" id="p-graph-card">
+      <h3 id="p-graph-title">📅 Medication Attendance</h3>
+      <div class="att-grid" id="p-att-grid"></div>
+      <div class="att-legend">
+        <div class="att-legend-item"><div class="leg-dot" style="background:var(--teal)"></div>Taken</div>
+        <div class="att-legend-item"><div class="leg-dot" style="background:var(--rose-dim);border:1px solid rgba(255,95,114,.3)"></div>Missed</div>
+        <div class="att-legend-item"><div class="leg-dot" style="background:var(--s3)"></div>Pending (today)</div>
+        <div class="att-legend-item"><div class="leg-dot" style="background:rgba(167,139,250,0.15);border:1px dashed rgba(167,139,250,0.3)"></div>Upcoming</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN SCREEN -->
+<div id="admin-screen" class="screen">
+  <aside class="sidebar">
+    <div class="sb-logo">MediSync</div>
+    <div class="sb-role">Admin Panel</div>
+    <nav class="sb-nav">
+      <div class="sbn on" onclick="switchAV('av-overview',this)"><span class="si">📊</span> Overview</div>
+      <div class="sbn" onclick="switchAV('av-patients',this)"><span class="si">👥</span> Patients</div>
+      <div class="sbn" onclick="switchAV('av-meds',this)"><span class="si">💊</span> Medications</div>
+      <div class="sbn" onclick="switchAV('av-alerts',this)"><span class="si">🔔</span> Alerts<span class="sb-badge" id="alert-count">0</span></div>
+      <div class="sbn" onclick="switchAV('av-activity',this)"><span class="si">📋</span> Activity</div>
+    </nav>
+    <div class="sb-foot">
+      <div class="sb-admin-info">
+        <div class="sb-avatar">DR</div>
+        <div><div class="sb-aname">Dr. Admin</div><div class="sb-arole">System Admin</div></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="width:100%" onclick="doLogout()">Logout</button>
+    </div>
+  </aside>
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div class="notif-bell-wrap" onclick="toggleNotifPanel()">
+        <span class="notif-bell">🔔</span>
+        <div class="notif-dot" id="notif-dot"></div>
+      </div>
+    </div>
+    <div class="notif-panel" id="notif-panel">
+      <div class="notif-panel-hdr">
+        <h4>Live Notifications</h4>
+        <button class="notif-clear" onclick="clearNotifs()">Clear all</button>
+      </div>
+      <div class="notif-panel-list" id="notif-panel-list">
+        <div class="notif-empty">No notifications yet.</div>
+      </div>
+    </div>
+    <!-- OVERVIEW -->
+    <div class="aview on" id="av-overview">
+      <div class="a-hdr"><h1>Good morning, Doctor 👋</h1><p id="a-date"></p></div>
+      <div class="metrics">
+        <div class="mc mt"><div class="mc-lbl">Total Patients</div><div class="mc-val t" id="m-total">0</div><div class="mc-note">Registered in system</div></div>
+        <div class="mc mb"><div class="mc-lbl">Critical Alerts</div><div class="mc-val r" id="m-alerts">0</div><div class="mc-note">Need attention now</div></div>
+        <div class="mc mg"><div class="mc-lbl">Avg Compliance</div><div class="mc-val a" id="m-comp">—</div><div class="mc-note">Across all patients</div></div>
+      </div>
+      <div class="tcard">
+        <div class="tcard-hdr"><h3>Patient Summary</h3></div>
+        <table><thead><tr><th>Patient</th><th>Condition</th><th>Compliance</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="ov-tb"></tbody></table>
+        <div class="empty-state" id="ov-empty" style="display:none">No patients registered yet.</div>
+      </div>
+    </div>
+    <!-- PATIENTS -->
+    <div class="aview" id="av-patients">
+      <div class="a-hdr-row">
+        <div class="a-hdr"><h1>Patients</h1><p>Manage all registered patients</p></div>
+        <button class="btn btn-teal btn-sm" onclick="openAddPatient()">+ Add Patient</button>
+      </div>
+      <div class="tcard">
+        <div class="tcard-hdr"><h3>Registry</h3><input class="srch" placeholder="🔍 Search..." oninput="filterPt(this.value)" /></div>
+        <table><thead><tr><th>Patient</th><th>Patient ID</th><th>Condition</th><th>Meds</th><th>Compliance</th><th>Actions</th></tr></thead>
+        <tbody id="pt-tb"></tbody></table>
+        <div class="empty-state" id="pt-empty">No patients yet. Click "+ Add Patient" to register one.</div>
+      </div>
+    </div>
+    <!-- MEDICATIONS -->
+    <div class="aview" id="av-meds">
+      <div class="a-hdr-row">
+        <div class="a-hdr"><h1>Medications</h1><p>Assign and manage prescriptions</p></div>
+        <button class="btn btn-blue btn-sm" onclick="openAddMed()">+ Assign Medication</button>
+      </div>
+      <div id="meds-by-patient"></div>
+    </div>
+    <!-- ALERTS -->
+    <div class="aview" id="av-alerts">
+      <div class="a-hdr"><h1>Alerts</h1><p>Patients requiring attention</p></div>
+      <div class="alert-list" id="adm-alerts"></div>
+    </div>
+    <!-- ACTIVITY LOG -->
+    <div class="aview" id="av-activity">
+      <div class="a-hdr"><h1>Activity Log</h1><p>Real-time patient medication events</p></div>
+      <div class="act-log">
+        <div class="act-log-hdr">
+          <h3>All Events</h3>
+          <button class="btn btn-ghost btn-sm" onclick="clearActivityLog()">Clear</button>
+        </div>
+        <div class="act-log-list" id="act-log-list">
+          <div class="act-empty" id="act-empty">No activity yet.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="notif-feed" id="notif-feed"></div>
+
+<script>
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+const DB = {
+  patients: [],
+  meds: [],        // each med: { id, patientId, name, dose, icon, color, times[], assignedDate, durationDays (null=ongoing), startDate, endDate }
+  doses: [],
+  activityLog: [],
+  notifications: [],
+};
+
+let currentUser = null;
+let pendingDoseId = null;
+let alarmDoseId = null;
+let alarmSnoozeTimeout = null;
+let clockInterval = null;
+let countdownInterval = null;
+
+const COLORS = {
+  teal:   ['rgba(0,229,180,.12)','var(--teal)'],
+  blue:   ['var(--blue-dim)','var(--blue)'],
+  amber:  ['var(--amber-dim)','var(--amber)'],
+  rose:   ['var(--rose-dim)','var(--rose)'],
+  violet: ['var(--violet-dim)','var(--violet)'],
+};
+function colorBg(c){ return COLORS[c]?.[0] ?? COLORS.teal[0]; }
+function colorFg(c){ return COLORS[c]?.[1] ?? COLORS.teal[1]; }
+function uid(){ return Math.random().toString(36).slice(2,10); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(d=new Date()){ return d.toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'}); }
+function fmtTime(d=new Date()){ return d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
+function fmtShortDate(date){ return new Date(date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}); }
+function greeting(){ const h=new Date().getHours(); return h<12?'Good morning':h<17?'Good afternoon':'Good evening'; }
+function initials(fn,ln){ return ((fn[0]||'')+(ln[0]||'')).toUpperCase(); }
+function avatarBg(name){
+  const c=['#00e5b4','#4d9fff','#ffb547','#ff5f72','#a78bfa','#34d399'];
+  const tc=['#041a14','#0d1f3c','#1a0f00','#1a0008','#1a0040','#003320'];
+  const i=name.charCodeAt(0)%c.length;
+  return [c[i],tc[i]];
+}
+
+// ── Date arithmetic helpers ──
+function addDays(dateStr, n){
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0,10);
+}
+function daysBetween(a, b){
+  return Math.round((new Date(b)-new Date(a))/(1000*60*60*24));
+}
+function isActiveMed(med){
+  const t = today();
+  if(t < med.startDate) return false;           // not started yet
+  if(med.endDate && t > med.endDate) return false; // course finished
+  return true;
+}
+function getMedStatusLabel(med){
+  const t = today();
+  if(t < med.startDate) return {cls:'future', text:`Starts ${fmtShortDate(med.startDate)}`};
+  if(med.endDate){
+    if(t > med.endDate) return {cls:'expired', text:`Completed ${fmtShortDate(med.endDate)}`};
+    const rem = daysBetween(t, med.endDate);
+    if(rem === 0) return {cls:'active', text:'Last day today'};
+    return {cls:'active', text:`${rem} day${rem!==1?'s':''} remaining · ends ${fmtShortDate(med.endDate)}`};
+  }
+  return {cls:'ongoing', text:'Ongoing prescription'};
+}
+function getDurationLabel(med){
+  if(!med.durationDays) return 'Ongoing';
+  return `${med.durationDays} day${med.durationDays!==1?'s':''} course`;
+}
+
+function openO(id){ document.getElementById(id).classList.add('open'); }
+function closeO(id){ document.getElementById(id).classList.remove('open'); }
+function toast(msg, type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=(type==='ok'?'✓ ':type==='er'?'✕ ':'⚠ ')+msg;
+  t.className='toast up '+type;
+  setTimeout(()=>t.classList.remove('up'), 3500);
+}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+function switchAV(id, el){
+  document.querySelectorAll('.aview').forEach(v=>v.classList.remove('on'));
+  document.querySelectorAll('.sbn').forEach(n=>n.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  el.classList.add('on');
+  if(id==='av-meds') renderAdminMeds();
+  if(id==='av-alerts') renderAdminAlerts();
+  if(id==='av-overview') renderAdminOverview();
+  if(id==='av-patients') renderPatientTable(DB.patients);
+  if(id==='av-activity') renderActivityLog();
+}
+
+// Toggle duration input visibility
+function toggleDurationInput(){
+  const type = document.getElementById('am-duration-type').value;
+  document.getElementById('am-duration-wrap').style.display = type==='days' ? 'block' : 'none';
+}
+
+// ══════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════
+function doPatientLogin(){
+  const pid=document.getElementById('pi-id').value.trim().toUpperCase();
+  const err=document.getElementById('pi-err');
+  const pt=DB.patients.find(p=>p.pid===pid);
+  if(!pt){ err.classList.add('on'); return; }
+  err.classList.remove('on');
+  currentUser={role:'patient', patientId:pt.id};
+  closeO('o-patient');
+  showScreen('patient-screen');
+  initPatientScreen(pt);
+}
+function doAdminLogin(){
+  const u=document.getElementById('ai-u').value.trim();
+  const p=document.getElementById('ai-p').value;
+  const err=document.getElementById('ai-err');
+  if(u==='admin' && p==='admin123'){
+    err.classList.remove('on');
+    currentUser={role:'admin'};
+    closeO('o-admin');
+    showScreen('admin-screen');
+    document.getElementById('a-date').textContent=fmtDate();
+    renderAdminOverview();
+  } else { err.classList.add('on'); }
+}
+function doLogout(){
+  stopAlarmSystem();
+  currentUser=null;
+  alarmDoseId=null;
+  showScreen('landing');
+  closeO('o-alarm');
+}
+
+// ══════════════════════════════════════════
+//  PATIENT SCREEN
+// ══════════════════════════════════════════
+function initPatientScreen(pt){
+  document.getElementById('p-av').textContent=initials(pt.fname,pt.lname);
+  document.getElementById('p-nm').textContent=`${pt.fname} ${pt.lname}`;
+  document.getElementById('p-greet').textContent=`${greeting()}, ${pt.fname} 👋`;
+  document.getElementById('p-date').textContent=fmtDate();
+  ensureTodayDoses(pt.id);
+  renderPatientMeds(pt.id);
+  renderAttendanceGraph(pt.id);
+  updateHeroRing(pt.id);
+  startAlarmSystem(pt.id);
+  startCountdownTicker(pt.id);
+  // Show missed dose popup after a short delay so dashboard renders first
+  setTimeout(()=>checkMissedOnLogin(pt.id), 800);
+}
+
+// ══════════════════════════════════════════
+//  MISSED DOSE POPUP (on login / page open)
+// ══════════════════════════════════════════
+let missedQueue = [];      // array of dose ids to show
+let missedQueueIdx = 0;    // current index in queue
+
+function checkMissedOnLogin(patientId){
+  const t = today();
+  const nowMin = new Date().getHours()*60 + new Date().getMinutes();
+  // Find all today's doses that are overdue (scheduled time passed) and not taken
+  const overdue = DB.doses.filter(d=>{
+    if(d.patientId !== patientId) return false;
+    if(d.date !== t) return false;
+    if(d.takenAt) return false;
+    const [h,m] = d.time.split(':').map(Number);
+    const doseMin = h*60+m;
+    // More than 2 minutes past scheduled time
+    return (nowMin - doseMin) > 2;
+  }).sort((a,b)=>a.time.localeCompare(b.time));
+
+  if(overdue.length === 0) return;
+
+  missedQueue = overdue.map(d=>d.id);
+  missedQueueIdx = 0;
+  showMissedPopup(missedQueueIdx);
+}
+
+function showMissedPopup(idx){
+  if(idx >= missedQueue.length){ closeO('o-missed'); return; }
+  const doseId = missedQueue[idx];
+  const dose = DB.doses.find(d=>d.id===doseId);
+  if(!dose){ advanceMissed(); return; }
+  const med = DB.meds.find(m=>m.id===dose.medId);
+  if(!med){ advanceMissed(); return; }
+
+  const nowMin = new Date().getHours()*60 + new Date().getMinutes();
+  const [h,m] = dose.time.split(':').map(Number);
+  const late = nowMin - (h*60+m);
+  const lateStr = late >= 60
+    ? `${Math.floor(late/60)}h ${late%60}m late`
+    : `${late}m late`;
+
+  document.getElementById('missed-icon').textContent = med.icon;
+  document.getElementById('missed-title').textContent =
+    missedQueue.length > 1
+      ? `Missed dose ${idx+1} of ${missedQueue.length}`
+      : 'You missed a dose!';
+  document.getElementById('missed-desc').textContent =
+    `You have ${missedQueue.length} missed dose${missedQueue.length>1?'s':''} today. Please take ${med.name} now or mark it as already taken.`;
+
+  document.getElementById('missed-list').innerHTML = `
+    <div class="missed-med-item">
+      <div class="missed-med-icon" style="background:${colorBg(med.color)}">${med.icon}</div>
+      <div class="missed-med-info">
+        <div class="missed-med-name">${med.name} <span style="color:var(--muted);font-weight:400;font-size:.8rem">${med.dose}</span></div>
+        <div class="missed-med-time">Scheduled at ${dose.time} &nbsp;·&nbsp; <span class="late-tag">⏱ ${lateStr}</span></div>
+      </div>
+    </div>`;
+
+  // Dots nav (if multiple missed)
+  const nav = document.getElementById('missed-nav');
+  if(missedQueue.length > 1){
+    nav.innerHTML = missedQueue.map((_,i)=>`<div class="missed-dot ${i===idx?'on':''}"></div>`).join('');
+    nav.insertAdjacentHTML('afterend',
+      `<div class="missed-counter" id="missed-ctr">${idx+1} / ${missedQueue.length}</div>`);
+  } else {
+    nav.innerHTML='';
+    const old=document.getElementById('missed-ctr');
+    if(old) old.remove();
+  }
+
+  openO('o-missed');
+}
+
+function advanceMissed(){
+  missedQueueIdx++;
+  if(missedQueueIdx >= missedQueue.length){
+    closeO('o-missed');
+    const old=document.getElementById('missed-ctr');
+    if(old) old.remove();
+  } else {
+    showMissedPopup(missedQueueIdx);
+  }
+}
+
+function takeMissedNow(){
+  const doseId = missedQueue[missedQueueIdx];
+  if(!doseId){ advanceMissed(); return; }
+  pendingDoseId = doseId;
+  closeO('o-missed');
+  // Slight delay so missed modal closes before confirm opens
+  setTimeout(()=>{
+    const dose = DB.doses.find(d=>d.id===doseId);
+    const med = dose ? DB.meds.find(m=>m.id===dose.medId) : null;
+    if(!dose||!med){ advanceMissed(); return; }
+    document.getElementById('conf-icon').textContent = med.icon;
+    document.getElementById('conf-title').textContent = `Take ${med.name} now?`;
+    document.getElementById('conf-desc').textContent =
+      `Confirm you are taking ${med.name} (${med.dose}) now. It was scheduled at ${dose.time}. This will be recorded as a late dose.`;
+    openO('o-confirm');
+    // After confirm, advance the missed queue
+    const origConfirm = window._confirmCallback;
+    window._missedAdvancePending = true;
+  }, 200);
+}
+
+function dismissMissed(){
+  // Mark as "already taken" — log it with current time
+  const doseId = missedQueue[missedQueueIdx];
+  const dose = DB.doses.find(d=>d.id===doseId);
+  const med = dose ? DB.meds.find(m=>m.id===dose.medId) : null;
+  if(dose && !dose.takenAt){
+    dose.takenAt = new Date().toISOString();
+    dose.markedLate = true;
+    const pt = DB.patients.find(p=>p.id===dose.patientId);
+    if(pt && med){
+      const msg=`${pt.fname} ${pt.lname} (${pt.pid}) marked ${med.name} as taken (late — was ${dose.time})`;
+      addActivityLog('taken', pt.id, med.id, msg);
+      showFloatingNotif('type-taken','✅',`${pt.fname} marked ${med.name} (late)`,fmtTime());
+    }
+    toast(`${med?.name} marked as taken`, 'ok');
+    const patientId = currentUser.patientId;
+    renderPatientMeds(patientId);
+    renderAttendanceGraph(patientId);
+    updateHeroRing(patientId);
+    refreshAlertBadge();
+  }
+  advanceMissed();
+}
+
+
+// Generate today's doses only for active meds
+function ensureTodayDoses(patientId){
+  const t=today();
+  DB.meds.filter(m=>m.patientId===patientId && isActiveMed(m)).forEach(med=>{
+    med.times.forEach(time=>{
+      if(!DB.doses.find(d=>d.medId===med.id && d.date===t && d.time===time))
+        DB.doses.push({id:uid(), medId:med.id, patientId, date:t, time, takenAt:null, snoozed:false, alarmed:false});
+    });
+  });
+}
+
+// ── Alarm system ──
+function stopAlarmSystem(){
+  if(clockInterval){ clearInterval(clockInterval); clockInterval=null; }
+  if(alarmSnoozeTimeout){ clearTimeout(alarmSnoozeTimeout); alarmSnoozeTimeout=null; }
+}
+function startAlarmSystem(patientId){
+  stopAlarmSystem();
+  clockInterval = setInterval(()=>checkAlarms(patientId), 15000);
+  checkAlarms(patientId);
+}
+function checkAlarms(patientId){
+  if(!currentUser || currentUser.role!=='patient') return;
+  const t=today();
+  const now=new Date();
+  const nowMin=now.getHours()*60+now.getMinutes();
+  const dueDoses=DB.doses.filter(d=>{
+    if(d.patientId!==patientId || d.date!==t || d.takenAt || d.alarmed) return false;
+    const [h,m]=d.time.split(':').map(Number);
+    const doseMin=h*60+m;
+    return Math.abs(doseMin - nowMin) <= 1;
+  });
+  if(dueDoses.length>0 && !document.getElementById('o-alarm').classList.contains('open'))
+    fireAlarm(dueDoses[0].id, patientId);
+}
+function fireAlarm(doseId, patientId){
+  const dose=DB.doses.find(d=>d.id===doseId);
+  if(!dose) return;
+  dose.alarmed=true;
+  alarmDoseId=doseId;
+  const med=DB.meds.find(m=>m.id===dose.medId);
+  if(!med) return;
+  document.getElementById('alarm-icon').textContent=med.icon;
+  document.getElementById('alarm-med-name').textContent=`${med.name} — ${med.dose}`;
+  document.getElementById('alarm-med-dose').textContent=`Scheduled at ${dose.time}. Please take your dose now.`;
+  openO('o-alarm');
+  playAlarmSound();
+  pushBrowserNotif(med.name, dose.time);
+}
+function playAlarmSound(){
+  try {
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const playBeep=(freq, start, dur)=>{
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type='sine'; o.frequency.value=freq;
+      g.gain.setValueAtTime(0,ctx.currentTime+start);
+      g.gain.linearRampToValueAtTime(0.3,ctx.currentTime+start+0.05);
+      g.gain.linearRampToValueAtTime(0,ctx.currentTime+start+dur);
+      o.start(ctx.currentTime+start);
+      o.stop(ctx.currentTime+start+dur+0.05);
+    };
+    playBeep(880,0,.2); playBeep(1100,.3,.2); playBeep(880,.6,.2); playBeep(1100,.9,.4);
+  } catch(e){}
+}
+function pushBrowserNotif(medName, time){
+  if(!('Notification' in window)) return;
+  if(Notification.permission==='granted')
+    new Notification('⏰ MediSync – Time for your Medicine!', {body:`Take ${medName} now (scheduled: ${time})`});
+  else if(Notification.permission!=='denied')
+    Notification.requestPermission();
+}
+function snoozeAlarm(){
+  closeO('o-alarm');
+  const dose=DB.doses.find(d=>d.id===alarmDoseId);
+  const med=dose?DB.meds.find(m=>m.id===dose.medId):null;
+  if(!dose||!med) return;
+  addActivityLog('snooze', dose.patientId, dose.medId, `Snoozed ${med.name} alarm for 5 minutes`);
+  toast(`${med.name} alarm snoozed for 5 minutes`, 'warn');
+  alarmSnoozeTimeout=setTimeout(()=>{
+    dose.alarmed=false;
+    if(currentUser && currentUser.role==='patient' && !dose.takenAt)
+      fireAlarm(dose.id, dose.patientId);
+  }, 5*60*1000);
+}
+function alarmTakeNow(){
+  closeO('o-alarm');
+  if(!alarmDoseId) return;
+  pendingDoseId=alarmDoseId;
+  confirmDose();
+  alarmDoseId=null;
+}
+
+// ── Countdown ticker ──
+function startCountdownTicker(patientId){
+  if(countdownInterval) clearInterval(countdownInterval);
+  countdownInterval=setInterval(()=>{ if(currentUser&&currentUser.role==='patient') updateCountdowns(patientId); }, 30000);
+  updateCountdowns(patientId);
+}
+function updateCountdowns(patientId){
+  const t=today();
+  const nowMin=new Date().getHours()*60+new Date().getMinutes();
+  DB.meds.filter(m=>m.patientId===patientId).forEach(med=>{
+    const el=document.getElementById(`cd-${med.id}`);
+    if(!el) return;
+    if(!isActiveMed(med)){ el.style.display='none'; return; }
+    const nextDose=DB.doses.find(d=>d.medId===med.id && d.date===t && !d.takenAt);
+    if(!nextDose){ el.style.display='none'; return; }
+    const [h,m]=nextDose.time.split(':').map(Number);
+    const diff=(h*60+m)-nowMin;
+    el.style.display='inline-flex';
+    if(diff<=0&&diff>=-5){ el.className='countdown-chip now'; el.innerHTML='🔴 Take NOW'; }
+    else if(diff>0&&diff<=15){ el.className='countdown-chip soon'; el.innerHTML=`⚠️ In ${diff} min`; }
+    else if(diff>0){ const hrs=Math.floor(diff/60),mins=diff%60; el.className='countdown-chip'; el.innerHTML=`⏱ ${hrs>0?hrs+'h ':''} ${mins}m`; }
+    else { el.className='countdown-chip soon'; el.innerHTML='⚠️ Overdue'; }
+  });
+}
+
+// ── Render patient med cards ──
+function renderPatientMeds(patientId){
+  const list=document.getElementById('p-meds-list');
+  const meds=DB.meds.filter(m=>m.patientId===patientId);
+  if(meds.length===0){
+    list.innerHTML='<div class="no-meds-msg">No medications assigned yet. Ask your doctor.</div>';
+    return;
+  }
+  const t=today();
+  const nowMin=new Date().getHours()*60+new Date().getMinutes();
+  list.innerHTML='';
+
+  // Sort: active first, then upcoming, then expired
+  const sorted=[...meds].sort((a,b)=>{
+    const aA=isActiveMed(a), bA=isActiveMed(b);
+    if(aA&&!bA) return -1;
+    if(!aA&&bA) return 1;
+    return 0;
+  });
+
+  sorted.forEach(med=>{
+    const active=isActiveMed(med);
+    const todayDoses=DB.doses.filter(d=>d.medId===med.id && d.date===t);
+    const allDone=active && todayDoses.length>0 && todayDoses.every(d=>d.takenAt);
+    const isAlarmActive=active && todayDoses.some(d=>{
+      if(d.takenAt) return false;
+      const [h,m]=d.time.split(':').map(Number);
+      return Math.abs(h*60+m - nowMin)<=5;
+    });
+    const timesHTML=todayDoses.map(d=>{
+      const cls=d.takenAt?'done':'';
+      return `<div class="tchip ${cls}">${d.takenAt?'✓':'⏰'} ${d.time}</div>`;
+    }).join('');
+
+    // Duration badge
+    const statusInfo = getMedStatusLabel(med);
+    const durLabel = getDurationLabel(med);
+
+    // Countdown
+    let cdClass='countdown-chip', cdText='';
+    if(active && !allDone){
+      const nextDose=todayDoses.find(d=>!d.takenAt);
+      if(nextDose){
+        const [h,m]=nextDose.time.split(':').map(Number);
+        const diff=(h*60+m)-nowMin;
+        if(diff<=0&&diff>=-5){ cdClass='countdown-chip now'; cdText='🔴 Take NOW'; }
+        else if(diff>0&&diff<=15){ cdClass='countdown-chip soon'; cdText=`⚠️ In ${diff} min`; }
+        else if(diff>0){ const hrs=Math.floor(diff/60),mins=diff%60; cdText=`⏱ ${hrs>0?hrs+'h ':''}${mins}m`; }
+        else { cdClass='countdown-chip soon'; cdText='⚠️ Overdue'; }
+      }
+    }
+
+    const card=document.createElement('div');
+    let cardClass=`med-card`;
+    if(allDone) cardClass+=' done';
+    if(isAlarmActive) cardClass+=' alarm-active';
+    if(!active && t > (med.endDate||'')) cardClass+=' expired';
+    card.className=cardClass;
+    card.innerHTML=`
+      <div class="med-icon-box" style="background:${colorBg(med.color)}">${med.icon}</div>
+      <div class="med-details">
+        <h4>${med.name} <span style="font-size:.78rem;color:var(--muted);font-weight:400">${med.dose}</span></h4>
+        <div class="dosage">${med.times.length}× daily &nbsp;·&nbsp; ${durLabel}</div>
+        <div style="margin-top:.3rem">
+          <span class="dur-badge ${statusInfo.cls}">${statusInfo.text}</span>
+        </div>
+        ${active ? `<div class="med-times-row">${timesHTML}</div>` : ''}
+        ${active && !allDone && cdText ? `<div id="cd-${med.id}" class="${cdClass}">${cdText}</div>` : `<div id="cd-${med.id}" style="display:none" class="countdown-chip"></div>`}
+      </div>
+      <button class="take-btn"
+        ${!active||allDone?'disabled':''} onclick="triggerDose('${med.id}')">
+        ${!active?(t < med.startDate ? '⏳ Upcoming' : '✓ Complete'):allDone?'✓ Done':'Mark Taken'}
+      </button>`;
+    list.appendChild(card);
+  });
+}
+
+function triggerDose(medId){
+  const med=DB.meds.find(m=>m.id===medId);
+  if(!med) return;
+  const t=today();
+  const nextDose=DB.doses.find(d=>d.medId===medId && d.date===t && !d.takenAt);
+  if(!nextDose) return;
+  pendingDoseId=nextDose.id;
+  document.getElementById('conf-icon').textContent=med.icon;
+  document.getElementById('conf-title').textContent=`Take ${med.name}?`;
+  document.getElementById('conf-desc').textContent=
+    `Confirm you are taking ${med.name} (${med.dose}) right now at ${nextDose.time}. This action will be logged permanently.`;
+  openO('o-confirm');
+}
+function confirmDose(){
+  if(!pendingDoseId) return;
+  const dose=DB.doses.find(d=>d.id===pendingDoseId);
+  if(dose){
+    dose.takenAt=new Date().toISOString();
+    const med=DB.meds.find(m=>m.id===dose.medId);
+    const pt=DB.patients.find(p=>p.id===dose.patientId);
+    closeO('o-confirm');
+    const wasMissedFlow = window._missedAdvancePending;
+    window._missedAdvancePending = false;
+    pendingDoseId=null;
+    const patientId=currentUser.patientId||dose.patientId;
+    renderPatientMeds(patientId);
+    renderAttendanceGraph(patientId);
+    updateHeroRing(patientId);
+    toast(`${med?.name} logged successfully!`);
+    refreshAlertBadge();
+    if(pt&&med){
+      const lateNote = dose.markedLate || wasMissedFlow ? ' (late dose)' : '';
+      const msg=`${pt.fname} ${pt.lname} (${pt.pid}) took ${med.name} ${med.dose} at ${fmtTime()}${lateNote}`;
+      addActivityLog('taken', pt.id, med.id, msg);
+      pushAdminNotif('type-taken','✅',`${pt.fname} ${pt.lname} took ${med.name}`,`${med.dose} · ${fmtTime()}`,pt.id);
+      showFloatingNotif('type-taken','✅',`${pt.fname} took ${med.name}`,fmtTime());
+    }
+    // If triggered from missed queue, move to next
+    if(wasMissedFlow){
+      setTimeout(()=>advanceMissed(), 300);
+    }
+  }
+}
+function updateHeroRing(patientId){
+  const t=today();
+  const todayDoses=DB.doses.filter(d=>d.patientId===patientId && d.date===t);
+  const taken=todayDoses.filter(d=>d.takenAt).length;
+  const total=todayDoses.length;
+  const pct=total>0?taken/total:0;
+  const circ=2*Math.PI*40;
+  document.getElementById('p-ring-arc').setAttribute('stroke-dasharray',`${circ*pct} ${circ}`);
+  document.getElementById('p-ring-num').textContent=`${taken}/${total}`;
+  document.getElementById('p-prog').style.width=`${pct*100}%`;
+  const meds=DB.meds.filter(m=>m.patientId===patientId && isActiveMed(m));
+  const next=meds.map(med=>{
+    const nd=DB.doses.find(d=>d.medId===med.id&&d.date===t&&!d.takenAt);
+    return nd?{med,time:nd.time}:null;
+  }).filter(Boolean).sort((a,b)=>a.time.localeCompare(b.time))[0];
+  document.getElementById('p-hero-h').textContent=total===0?'No active medications today':`${taken} of ${total} doses taken today`;
+  document.getElementById('p-hero-p').textContent=next?`Next: ${next.med.name} at ${next.time}`:taken===total&&total>0?'✅ All doses complete for today!':'';
+}
+
+// ── Attendance graph — shows full course window ──
+function renderAttendanceGraph(patientId){
+  const grid=document.getElementById('p-att-grid');
+  const meds=DB.meds.filter(m=>m.patientId===patientId);
+  if(meds.length===0){
+    grid.innerHTML='<div style="color:var(--muted);font-size:.85rem;padding:.5rem">No medications to display.</div>';
+    document.getElementById('p-graph-title').textContent='📅 Medication Attendance';
+    return;
+  }
+  // Determine range: from earliest start to latest end (or today if ongoing/future)
+  let earliest = today();
+  let latest = today();
+  meds.forEach(m=>{
+    if(m.startDate < earliest) earliest = m.startDate;
+    const end = m.endDate || today();
+    if(end > latest) latest = end;
+  });
+
+  const days=[];
+  for(let d=new Date(earliest);d<=new Date(latest);d.setDate(d.getDate()+1))
+    days.push(d.toISOString().slice(0,10));
+
+  document.getElementById('p-graph-title').textContent=
+    `📅 Full Course Attendance — ${fmtShortDate(earliest)} → ${latest===today()?'Today':fmtShortDate(latest)}`;
+  grid.innerHTML='';
+
+  // Header row with dates
+  const headerRow=document.createElement('div');
+  headerRow.className='att-row';
+  headerRow.style.marginBottom='.25rem';
+  const spacer=document.createElement('div'); spacer.className='att-med-label'; headerRow.appendChild(spacer);
+  const headerDays=document.createElement('div'); headerDays.className='att-days';
+  const step=days.length>60?7:days.length>21?3:1;
+  days.forEach((date,i)=>{
+    const cell=document.createElement('div');
+    cell.style.cssText='width:18px;height:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;';
+    if(i%step===0){
+      const d=new Date(date);
+      cell.innerHTML=`<span style="font-size:.48rem;color:var(--muted);transform:rotate(-45deg);display:block;white-space:nowrap">${d.getDate()}/${d.getMonth()+1}</span>`;
+    }
+    headerDays.appendChild(cell);
+  });
+  headerRow.appendChild(headerDays); grid.appendChild(headerRow);
+
+  meds.forEach(med=>{
+    const row=document.createElement('div'); row.className='att-row';
+    const lbl=document.createElement('div'); lbl.className='att-med-label';
+    lbl.title=`${med.name} ${med.dose}`; lbl.textContent=`${med.icon} ${med.name}`; row.appendChild(lbl);
+    const daysWrap=document.createElement('div'); daysWrap.className='att-days';
+    const t=today();
+    days.forEach(date=>{
+      const cell=document.createElement('div'); cell.className='att-cell';
+      // Outside this med's range
+      if(date < med.startDate || (med.endDate && date > med.endDate)){
+        cell.style.cssText='width:18px;height:18px;border-radius:4px;flex-shrink:0;background:transparent;';
+        cell.title='Not in course';
+        daysWrap.appendChild(cell);
+        return;
+      }
+      // Future date (after today)
+      if(date > t){
+        cell.classList.add('future');
+        const d=new Date(date);
+        cell.title=`${d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})}: Scheduled`;
+        daysWrap.appendChild(cell);
+        return;
+      }
+      const doses=DB.doses.filter(d=>d.medId===med.id && d.date===date);
+      let cls='pending';
+      if(doses.length>0){
+        cls = date===t ? (doses.some(d=>d.takenAt)?'taken':'pending') : (doses.every(d=>d.takenAt)?'taken':'missed');
+      } else {
+        cls = date < t ? 'missed' : 'pending';
+      }
+      cell.classList.add(cls);
+      const d=new Date(date);
+      cell.title=`${d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})}: ${cls.charAt(0).toUpperCase()+cls.slice(1)}`;
+      daysWrap.appendChild(cell);
+    });
+    row.appendChild(daysWrap); grid.appendChild(row);
+  });
+}
+
+// ══════════════════════════════════════════
+//  ADMIN NOTIFICATIONS
+// ══════════════════════════════════════════
+function addActivityLog(type, patientId, medId, msg){
+  const entry={id:uid(), type, patientId, medId, msg, time:fmtTime(), fullTime:new Date().toISOString()};
+  DB.activityLog.unshift(entry);
+  DB.notifications.unshift(entry);
+  if(DB.activityLog.length>200) DB.activityLog.pop();
+  if(DB.notifications.length>50) DB.notifications.pop();
+  renderActivityLog();
+  renderNotifPanel();
+}
+function pushAdminNotif(typeClass, icon, title, desc, patientId){
+  const dot=document.getElementById('notif-dot');
+  if(dot) dot.classList.add('on');
+}
+function showFloatingNotif(typeClass, icon, title, time){
+  const feed=document.getElementById('notif-feed');
+  const card=document.createElement('div');
+  card.className=`notif-card ${typeClass}`;
+  card.innerHTML=`<div class="notif-icon">${icon}</div><div class="notif-body"><div class="notif-title">${title}</div><div class="notif-desc">${time}</div></div><button class="notif-close" onclick="this.parentElement.remove()">✕</button>`;
+  feed.appendChild(card);
+  setTimeout(()=>{ if(card.parentElement) card.remove(); }, 6000);
+}
+function toggleNotifPanel(){
+  const panel=document.getElementById('notif-panel');
+  panel.classList.toggle('open');
+  if(panel.classList.contains('open')){ document.getElementById('notif-dot').classList.remove('on'); renderNotifPanel(); }
+}
+function renderNotifPanel(){
+  const list=document.getElementById('notif-panel-list');
+  if(DB.notifications.length===0){ list.innerHTML='<div class="notif-empty">No notifications yet.</div>'; return; }
+  const typeMap={taken:'✅',alert:'🚨',snooze:'⏱'};
+  list.innerHTML=DB.notifications.map(n=>`<div class="notif-panel-item ${n.type}"><div class="npi-title">${typeMap[n.type]||'ℹ️'} ${n.msg}</div><div class="npi-time">🕐 ${n.time}</div></div>`).join('');
+}
+function clearNotifs(){ DB.notifications=[]; renderNotifPanel(); }
+function renderActivityLog(){
+  const list=document.getElementById('act-log-list');
+  if(!list) return;
+  if(DB.activityLog.length===0){ list.innerHTML='<div class="act-empty" id="act-empty">No activity yet.</div>'; return; }
+  list.innerHTML=DB.activityLog.map(e=>{
+    const icon=e.type==='taken'?'✅':e.type==='snooze'?'⏱':'🚨';
+    return `<div class="act-item"><div class="act-dot ${e.type}"></div><div class="act-txt">${icon} ${e.msg}</div><div class="act-time">${e.time}</div></div>`;
+  }).join('');
+}
+function clearActivityLog(){ DB.activityLog=[]; renderActivityLog(); }
+
+// ══════════════════════════════════════════
+//  ADMIN: PATIENTS
+// ══════════════════════════════════════════
+function openAddPatient(){
+  ['np-fn','np-ln','np-pid','np-cond'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('np-dob').value='';
+  document.getElementById('np-err').classList.remove('on');
+  openO('o-add-patient');
+}
+function saveNewPatient(){
+  const fn=document.getElementById('np-fn').value.trim();
+  const ln=document.getElementById('np-ln').value.trim();
+  const dob=document.getElementById('np-dob').value;
+  const cond=document.getElementById('np-cond').value.trim();
+  const pid=document.getElementById('np-pid').value.trim().toUpperCase();
+  const err=document.getElementById('np-err');
+  if(!fn||!ln||!pid){err.classList.add('on');return;}
+  if(DB.patients.find(p=>p.pid===pid)){err.textContent='Patient ID already exists.';err.classList.add('on');return;}
+  err.classList.remove('on');
+  DB.patients.push({id:uid(),pid,fname:fn,lname:ln,dob:dob||'—',condition:cond||'General'});
+  closeO('o-add-patient');
+  renderPatientTable(DB.patients);
+  renderAdminOverview();
+  refreshAlertBadge();
+  toast(`${fn} ${ln} registered as ${pid}`);
+}
+function renderPatientTable(list){
+  const tb=document.getElementById('pt-tb');
+  const empty=document.getElementById('pt-empty');
+  if(list.length===0){tb.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tb.innerHTML=list.map(p=>{
+    const [bg,fg]=avatarBg(p.fname+p.lname);
+    const medCount=DB.meds.filter(m=>m.patientId===p.id).length;
+    const comp=getCompliance(p.id);
+    const compColor=comp>=85?'var(--teal)':comp>=65?'var(--amber)':'var(--rose)';
+    return `<tr>
+      <td><div class="pcell"><div class="pmini" style="background:${bg};color:${fg}">${initials(p.fname,p.lname)}</div>${p.fname} ${p.lname}</div></td>
+      <td style="color:var(--muted);font-family:monospace">${p.pid}</td>
+      <td style="color:var(--muted)">${p.condition}</td>
+      <td><span style="color:var(--muted)">${medCount} med${medCount!==1?'s':''}</span></td>
+      <td><div class="comp-bar"><div class="comp-fill" style="width:${comp}%;background:${compColor}"></div></div>${comp}%</td>
+      <td><button class="abtn" onclick="viewPatientDetail('${p.id}')">Detail</button><button class="abtn del" onclick="deletePatient('${p.id}')">Delete</button></td>
+    </tr>`;
+  }).join('');
+}
+function filterPt(q){
+  const f=q?DB.patients.filter(p=>(p.fname+' '+p.lname).toLowerCase().includes(q.toLowerCase())||p.pid.includes(q.toUpperCase())||p.condition.toLowerCase().includes(q.toLowerCase())):DB.patients;
+  renderPatientTable(f);
+}
+function deletePatient(id){
+  if(!confirm('Delete this patient and all their records?')) return;
+  const pt=DB.patients.find(p=>p.id===id);
+  DB.patients=DB.patients.filter(p=>p.id!==id);
+  DB.meds=DB.meds.filter(m=>m.patientId!==id);
+  DB.doses=DB.doses.filter(d=>d.patientId!==id);
+  DB.activityLog=DB.activityLog.filter(a=>a.patientId!==id);
+  renderPatientTable(DB.patients);
+  renderAdminOverview();
+  renderAdminMeds();
+  refreshAlertBadge();
+  toast(`${pt?.fname} ${pt?.lname} removed`,'er');
+}
+
+// ══════════════════════════════════════════
+//  ADMIN: MEDICATIONS
+// ══════════════════════════════════════════
+function openAddMed(){
+  if(DB.patients.length===0){ toast('Register a patient first','er'); return; }
+  const sel=document.getElementById('am-patient');
+  sel.innerHTML=DB.patients.map(p=>`<option value="${p.id}">${p.fname} ${p.lname} (${p.pid})</option>`).join('');
+  ['am-name','am-dose','am-times'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('am-duration').value='';
+  document.getElementById('am-startdate').value='';
+  document.getElementById('am-duration-type').value='days';
+  document.getElementById('am-duration-wrap').style.display='block';
+  document.getElementById('am-err').classList.remove('on');
+  openO('o-add-med');
+}
+function saveNewMed(){
+  const patientId=document.getElementById('am-patient').value;
+  const name=document.getElementById('am-name').value.trim();
+  const dose=document.getElementById('am-dose').value.trim();
+  const icon=document.getElementById('am-icon').value;
+  const color=document.getElementById('am-color').value;
+  const timesRaw=document.getElementById('am-times').value.trim();
+  const durationType=document.getElementById('am-duration-type').value;
+  const durationRaw=document.getElementById('am-duration').value;
+  const startDateRaw=document.getElementById('am-startdate').value;
+  const err=document.getElementById('am-err');
+
+  if(!name||!timesRaw||!patientId){ err.classList.add('on'); return; }
+  if(durationType==='days' && (!durationRaw || parseInt(durationRaw)<1)){
+    err.textContent='Please enter a valid number of days (minimum 1).';
+    err.classList.add('on'); return;
+  }
+  err.classList.remove('on');
+
+  const times=timesRaw.split(',').map(t=>t.trim()).filter(Boolean);
+  const startDate=startDateRaw||today();
+  const durationDays=durationType==='days'?parseInt(durationRaw):null;
+  const endDate=durationDays?addDays(startDate, durationDays-1):null;
+
+  const med={id:uid(),patientId,name,dose,icon,color,times,
+    assignedDate:today(), startDate, endDate, durationDays};
+  DB.meds.push(med);
+
+  // Pre-generate all dose records for fixed-duration meds
+  if(endDate){
+    for(let d=new Date(startDate);d<=new Date(endDate);d.setDate(d.getDate()+1)){
+      const dateStr=d.toISOString().slice(0,10);
+      times.forEach(time=>{
+        if(!DB.doses.find(x=>x.medId===med.id&&x.date===dateStr&&x.time===time))
+          DB.doses.push({id:uid(),medId:med.id,patientId,date:dateStr,time,takenAt:null,alarmed:false,snoozed:false});
+      });
+    }
+  } else {
+    // Ongoing: only create today's doses (more will be created on patient login each day)
+    times.forEach(time=>{
+      const t2=startDate<=today()?today():startDate;
+      if(t2<=today())
+        DB.doses.push({id:uid(),medId:med.id,patientId,date:t2,time,takenAt:null,alarmed:false,snoozed:false});
+    });
+  }
+
+  closeO('o-add-med');
+  renderAdminMeds();
+  renderAdminOverview();
+  const pt=DB.patients.find(p=>p.id===patientId);
+  const dLabel=durationDays?`for ${durationDays} day${durationDays!==1?'s':''}`:' (ongoing)';
+  toast(`${name} assigned to ${pt?.fname} ${pt?.lname} ${dLabel}`);
+}
+function renderAdminMeds(){
+  const container=document.getElementById('meds-by-patient');
+  if(DB.patients.length===0){ container.innerHTML='<div class="empty-state">No patients registered. Add a patient first.</div>'; return; }
+  container.innerHTML='';
+  DB.patients.forEach(pt=>{
+    const meds=DB.meds.filter(m=>m.patientId===pt.id);
+    const section=document.createElement('div'); section.className='tcard'; section.style.marginBottom='1.2rem';
+    const [bg,fg]=avatarBg(pt.fname+pt.lname);
+    section.innerHTML=`
+      <div class="tcard-hdr">
+        <h3 style="display:flex;align-items:center;gap:.6rem">
+          <div class="pmini" style="background:${bg};color:${fg};width:28px;height:28px;font-size:.7rem">${initials(pt.fname,pt.lname)}</div>
+          ${pt.fname} ${pt.lname}
+          <span style="color:var(--muted);font-weight:400;font-size:.82rem">(${pt.pid})</span>
+        </h3>
+        <button class="btn btn-blue btn-sm" onclick="openAddMedFor('${pt.id}')">+ Add Med</button>
+      </div>
+      <div style="padding:1rem">
+        ${meds.length===0
+          ?'<div style="color:var(--muted);font-size:.85rem;text-align:center;padding:1rem">No medications assigned yet.</div>'
+          :meds.map(med=>{
+            const statusInfo=getMedStatusLabel(med);
+            const durLabel=getDurationLabel(med);
+            let durCls='';
+            if(!med.durationDays) durCls='ongoing';
+            else if(today()>(med.endDate||'')) durCls='done';
+            return `<div class="med-admin-row">
+              <div class="mar-icon" style="background:${colorBg(med.color)}">${med.icon}</div>
+              <div class="mar-info">
+                <div class="mar-name">${med.name} <span style="color:var(--muted);font-weight:400">${med.dose}</span></div>
+                <div class="mar-dose">${med.times.length}× daily</div>
+                <div class="mar-times">${med.times.map(t=>`<div class="mar-time">⏰ ${t}</div>`).join('')}</div>
+                <div class="mar-duration ${durCls}">
+                  ${med.durationDays?`📅 ${durLabel} · ${fmtShortDate(med.startDate)} → ${fmtShortDate(med.endDate)}`:`♾ Ongoing prescription`}
+                  &nbsp;|&nbsp; ${statusInfo.text}
+                </div>
+              </div>
+              <button class="abtn del btn-sm" onclick="deleteMed('${med.id}')">Remove</button>
+            </div>`;
+          }).join('')}
+      </div>`;
+    container.appendChild(section);
+  });
+}
+function openAddMedFor(patientId){
+  openAddMed();
+  setTimeout(()=>document.getElementById('am-patient').value=patientId, 50);
+}
+function deleteMed(medId){
+  const med=DB.meds.find(m=>m.id===medId);
+  if(!confirm(`Remove ${med?.name}?`)) return;
+  DB.meds=DB.meds.filter(m=>m.id!==medId);
+  DB.doses=DB.doses.filter(d=>d.medId!==medId);
+  renderAdminMeds(); renderAdminOverview();
+  toast(`${med?.name} removed`,'er');
+}
+
+// ══════════════════════════════════════════
+//  ADMIN: OVERVIEW
+// ══════════════════════════════════════════
+function renderAdminOverview(){
+  document.getElementById('m-total').textContent=DB.patients.length;
+  const alerts=buildAlerts();
+  document.getElementById('m-alerts').textContent=alerts.filter(a=>a.type==='crit').length;
+  const comps=DB.patients.map(p=>getCompliance(p.id)).filter(c=>c>=0);
+  const avg=comps.length?Math.round(comps.reduce((a,b)=>a+b,0)/comps.length):0;
+  document.getElementById('m-comp').textContent=comps.length?avg+'%':'—';
+  const tb=document.getElementById('ov-tb');
+  const empty=document.getElementById('ov-empty');
+  if(DB.patients.length===0){tb.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tb.innerHTML=DB.patients.map(p=>{
+    const comp=getCompliance(p.id);
+    const compColor=comp>=85?'var(--teal)':comp>=65?'var(--amber)':'var(--rose)';
+    const status=comp>=85?'ok':comp>=65?'warn':'crit';
+    const statusLabel=comp>=85?'On Track':comp>=65?'Warning':'Critical';
+    return `<tr>
+      <td>${p.fname} ${p.lname}</td>
+      <td style="color:var(--muted)">${p.condition}</td>
+      <td><div class="comp-bar"><div class="comp-fill" style="width:${comp}%;background:${compColor}"></div></div>${comp}%</td>
+      <td><span class="badge ${status}">${statusLabel}</span></td>
+      <td><button class="abtn" onclick="viewPatientDetail('${p.id}')">View</button></td>
+    </tr>`;
+  }).join('');
+}
+function getCompliance(patientId){
+  const past=DB.doses.filter(d=>d.patientId===patientId && d.date<today());
+  if(past.length===0) return 100;
+  return Math.round((past.filter(d=>d.takenAt).length/past.length)*100);
+}
+
+// ════ ALERTS ════
+function buildAlerts(){
+  const result=[];
+  DB.patients.forEach(pt=>{
+    const tDoses=DB.doses.filter(d=>d.patientId===pt.id && d.date===today());
+    const nowMin=new Date().getHours()*60+new Date().getMinutes();
+    const actuallyLate=tDoses.filter(d=>{
+      if(d.takenAt) return false;
+      const [h,m]=d.time.split(':').map(Number);
+      return (h*60+m)<nowMin;
+    });
+    if(actuallyLate.length>0)
+      result.push({type:'crit',icon:'🚨',title:`${pt.fname} ${pt.lname} — ${actuallyLate.length} overdue dose${actuallyLate.length>1?'s':''} today`,desc:`Scheduled: ${actuallyLate.map(d=>d.time).join(', ')} — not yet logged.`,time:'Today'});
+    const comp=getCompliance(pt.id);
+    if(comp<65&&DB.doses.filter(d=>d.patientId===pt.id&&d.date<today()).length>0)
+      result.push({type:'crit',icon:'⚠️',title:`${pt.fname} ${pt.lname} — Low compliance: ${comp}%`,desc:'Patient adherence is critically low. Intervention recommended.',time:'Ongoing'});
+    else if(comp<80&&comp>=65&&DB.doses.filter(d=>d.patientId===pt.id&&d.date<today()).length>0)
+      result.push({type:'warn',icon:'📉',title:`${pt.fname} ${pt.lname} — Compliance at ${comp}%`,desc:'Below recommended threshold. Consider follow-up.',time:'Ongoing'});
+    // Alert when a fixed-duration med is expiring soon
+    DB.meds.filter(m=>m.patientId===pt.id&&m.endDate).forEach(med=>{
+      const daysLeft=daysBetween(today(),med.endDate);
+      if(daysLeft===1)
+        result.push({type:'warn',icon:'⏳',title:`${pt.fname} ${pt.lname} — ${med.name} ends tomorrow`,desc:`Last dose of ${med.name} ${med.dose} is scheduled for ${fmtShortDate(med.endDate)}.`,time:'Tomorrow'});
+    });
+  });
+  return result;
+}
+function refreshAlertBadge(){
+  const alerts=buildAlerts();
+  const crit=alerts.filter(a=>a.type==='crit').length;
+  const badge=document.getElementById('alert-count');
+  badge.textContent=crit;
+  badge.style.display=crit>0?'':'none';
+}
+function renderAdminAlerts(){
+  const alerts=buildAlerts();
+  const container=document.getElementById('adm-alerts');
+  if(alerts.length===0){ container.innerHTML='<div class="empty-state">🎉 No alerts right now. All patients are on track!</div>'; return; }
+  container.innerHTML=alerts.map(a=>`
+    <div class="alert-item ${a.type}">
+      <div class="ai-icon">${a.icon}</div>
+      <div class="ai-body"><div class="ai-title">${a.title}</div><div class="ai-desc">${a.desc}</div></div>
+      <div class="ai-time">${a.time}</div>
+    </div>`).join('');
+}
+
+// ── Patient Detail ──
+function viewPatientDetail(patientId){
+  const pt=DB.patients.find(p=>p.id===patientId);
+  if(!pt) return;
+  const meds=DB.meds.filter(m=>m.patientId===patientId);
+  const comp=getCompliance(patientId);
+  const compColor=comp>=85?'var(--teal)':comp>=65?'var(--amber)':'var(--rose)';
+  const [avBg,avFg]=avatarBg(pt.fname+pt.lname);
+
+  function medDays(med){
+    const start=new Date(med.startDate), end=new Date(med.endDate||today()), arr=[];
+    for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)) arr.push(d.toISOString().slice(0,10));
+    return arr;
+  }
+  const medsHTML=meds.map(med=>{
+    const days=medDays(med);
+    const durLabel=getDurationLabel(med);
+    const t=today();
+    const cellsHTML=days.map(date=>{
+      if(date > t){ return `<div class="mini-cell future" title="${date}: Upcoming"></div>`; }
+      const doses=DB.doses.filter(d=>d.medId===med.id && d.date===date);
+      let cls='pending';
+      if(doses.length>0){ cls=doses.every(d=>d.takenAt)?'taken':date<t?'missed':'pending'; }
+      else { cls=date<t?'missed':'pending'; }
+      const d=new Date(date);
+      return `<div class="mini-cell ${cls}" title="${d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})}: ${cls.charAt(0).toUpperCase()+cls.slice(1)}"></div>`;
+    }).join('');
+    const statusInfo=getMedStatusLabel(med);
+    return `<div style="margin-bottom:1rem">
+      <div style="font-size:.85rem;font-weight:600;margin-bottom:.2rem">${med.icon} ${med.name} ${med.dose}</div>
+      <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.4rem">
+        <span style="font-size:.72rem;color:var(--muted)">${med.times.join(', ')} · ${durLabel}</span>
+        <span class="dur-badge ${statusInfo.cls}" style="font-size:.68rem">${statusInfo.text}</span>
+      </div>
+      <div class="mini-att">${cellsHTML}</div>
+    </div>`;
+  }).join('');
+
+  const ptActivity=DB.activityLog.filter(a=>a.patientId===patientId).slice(0,5);
+  const actHTML=ptActivity.length?ptActivity.map(e=>`
+    <div style="display:flex;align-items:center;gap:.7rem;padding:.6rem 0;border-bottom:1px solid var(--border);">
+      <div style="width:7px;height:7px;border-radius:50%;background:${e.type==='taken'?'var(--teal)':e.type==='snooze'?'var(--amber)':'var(--rose)'};flex-shrink:0"></div>
+      <div style="flex:1;font-size:.8rem">${e.msg}</div>
+      <div style="font-size:.72rem;color:var(--dim)">${e.time}</div>
+    </div>`).join('')
+    :'<div style="color:var(--muted);font-size:.8rem;padding:.5rem 0">No activity recorded yet.</div>';
+
+  document.getElementById('pd-content').innerHTML=`
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem">
+      <div style="width:52px;height:52px;border-radius:50%;background:${avBg};color:${avFg};display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:1.1rem;font-weight:800">${initials(pt.fname,pt.lname)}</div>
+      <div><h2 style="font-family:var(--font-head);font-size:1.4rem;font-weight:800">${pt.fname} ${pt.lname}</h2>
+      <p style="color:var(--muted);font-size:.82rem">${pt.pid} · ${pt.condition}</p></div>
+    </div>
+    <div class="pd-grid">
+      <div class="pd-info-box"><div class="pdk">Date of Birth</div><div class="pdv">${pt.dob}</div></div>
+      <div class="pd-info-box"><div class="pdk">Condition</div><div class="pdv">${pt.condition}</div></div>
+      <div class="pd-info-box"><div class="pdk">Total Medications</div><div class="pdv">${meds.length}</div></div>
+      <div class="pd-info-box"><div class="pdk">Compliance (All Time)</div><div class="pdv" style="color:${compColor}">${comp}%</div></div>
+    </div>
+    <div style="font-family:var(--font-head);font-weight:700;font-size:.95rem;margin-bottom:.8rem">📋 Recent Activity</div>
+    <div style="background:var(--s2);border-radius:12px;padding:.8rem 1rem;margin-bottom:1.4rem">${actHTML}</div>
+    <div style="font-family:var(--font-head);font-weight:700;font-size:.95rem;margin-bottom:.9rem">📅 Course Attendance</div>
+    ${medsHTML||'<div style="color:var(--muted);font-size:.85rem">No medications assigned.</div>'}
+    <div style="display:flex;gap:.8rem;margin-top:.5rem;justify-content:flex-end;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--muted)"><div class="mini-cell taken" style="display:inline-block"></div>Taken</div>
+      <div style="display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--muted)"><div class="mini-cell missed" style="display:inline-block"></div>Missed</div>
+      <div style="display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--muted)"><div class="mini-cell pending" style="display:inline-block"></div>Pending</div>
+      <div style="display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--muted)"><div class="mini-cell future" style="display:inline-block"></div>Upcoming</div>
+    </div>`;
+  openO('o-patient-detail');
+}
+
+// ══════════════════════════════════════════
+//  EVENT LISTENERS
+// ══════════════════════════════════════════
+document.querySelectorAll('.overlay').forEach(ov=>{
+  ov.addEventListener('click',e=>{ if(e.target===ov && ov.id!=='o-alarm' && ov.id!=='o-missed') ov.classList.remove('open'); });
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') document.querySelectorAll('.overlay.open').forEach(ov=>{ if(ov.id!=='o-alarm' && ov.id!=='o-missed') ov.classList.remove('open'); });
+  if(e.key==='Enter'){
+    if(document.getElementById('o-patient').classList.contains('open')) doPatientLogin();
+    if(document.getElementById('o-admin').classList.contains('open')) doAdminLogin();
+  }
+});
+document.addEventListener('click',e=>{
+  const panel=document.getElementById('notif-panel');
+  const bell=document.querySelector('.notif-bell-wrap');
+  if(panel&&bell&&!panel.contains(e.target)&&!bell.contains(e.target)) panel.classList.remove('open');
+});
+refreshAlertBadge();
+</script>
+</body>
+</html>
